@@ -91,4 +91,84 @@ class Books
             ));
         }
     }
+
+    function InsertarLibro()
+    {
+        try {
+
+            $db = Flight::db();
+            $nombre = Flight::request()->data->nombre_libro;
+            $autor = Flight::request()->data->autor_libro;
+            $fecha = Flight::request()->data->fecha_libro;
+            $categoria = Flight::request()->data->categoria_libro;
+
+            // Realiza validaciones
+            $errores = [];
+
+            if (empty($nombre)) {
+                $errores[] = "El nombre es obligatorio";
+            } elseif (strlen($nombre) < 2 || strlen($nombre) > 50) {
+                $errores[] = "El nombre debe tener entre 2 y 50 caracteres.";
+            }
+
+            if (empty($autor)) {
+                $errores[] = "El nombre del autor es obligatorio";
+            } elseif (strlen($autor) < 2 || strlen($autor) > 50) {
+                $errores[] = "El nombre del autor debe tener entre 2 y 50 caracteres.";
+            }
+
+            if (strtotime($fecha) === false) {
+                $errores[] = "Fecha no valida";
+            }
+
+            if (empty($categoria)) {
+                $errores[] = "La categoria del libro es obligatorio";
+            }
+
+            if (!empty($errores)) {
+                Flight::halt(400, json_encode(
+                    [
+                        "error" => $errores,
+                        "status" => "Error",
+                        "code" => "400"
+                    ]
+                ));
+            } else {
+
+                $query = $db->prepare("INSERT INTO tbl_libros (nombre_libro, autor_libro, fecha_libro, categoria_libro) VALUES (:nombre, :autor, :fecha, :categoria)");
+
+                if ($query->execute([":nombre" => $nombre, ":autor" => $autor, ":fecha" => $fecha, ":categoria" => $categoria])) {
+
+                    $array = [
+                        "Nuevo Libro" => [
+                            "Nombre del Libro" => $nombre,
+                            "Autor" => $autor,
+                            "Fecha de Publicacion" => $fecha,
+                            "Categoria" => $categoria,
+                        ],
+                        "status" => "success",
+                        "code" => "200",
+                    ];
+                } else {
+                    Flight::halt(500, json_encode(
+                        [
+                            "error" => "Hubo un error al agregar los registros",
+                            "status" => "Error",
+                            "code" => "500"
+                        ]
+                    ));
+                }
+            }
+
+            Flight::json($array);
+        } catch (PDOException $e) {
+            Flight::halt(500, json_encode(
+                [
+                    "error" => "Error en la consulta SQL: " . $e->getMessage(),
+                    "status" => "error",
+                    "code" => "500"
+                ]
+            ));
+        }
+    }
 }
