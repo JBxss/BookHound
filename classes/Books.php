@@ -254,4 +254,48 @@ class Books
             ));
         }
     }
+
+    function EliminarLibro()
+    {
+        try {
+            $db = Flight::db();
+            $id = Flight::request()->data->id;
+
+            // Validar que $id sea un número entero positivo
+            if (!is_numeric($id) || $id <= 0) {
+                Flight::halt(400, json_encode([
+                    "error" => "ID no valido",
+                    "status" => "error",
+                    "code" => "400"
+                ]));
+            }
+
+
+            $query = $db->prepare("DELETE from tbl_libros WHERE id = :id");
+
+            $array = [
+                "error" => "Hubo un error al eliminar los registros",
+                "status" => "Error"
+            ];
+
+            if ($query->execute([":id" => $id])) {
+                $array = [
+                    "data" => [
+                        "ID Libro" => $id
+                    ],
+                    "status" => "success"
+                ];
+            };
+
+            Flight::json($array);
+        } catch (PDOException $e) {
+            Flight::halt(500, json_encode(
+                [
+                    "error" => "Error en la consulta SQL: " . $e->getMessage(),
+                    "status" => "error",
+                    "code" => "500"
+                ]
+            ));
+        }
+    }
 }
