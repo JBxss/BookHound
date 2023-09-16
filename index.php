@@ -8,7 +8,7 @@ Flight::register('db', 'PDO', array('mysql:host=localhost;dbname=APILibros', 'ro
 $books = new Books();
 
 Flight::route('GET /books', [$books, 'obtenerLibros']);
-// Flight::route('GET /books', [$books, '']);
+Flight::route('GET /books/@id', [$books, 'obtenerLibrosId']);
 // Flight::route('POST /books', [$books, '']);
 // Flight::route('PUT /books', [$books, '']);
 // Flight::route('DELETE /books', [$books, '']);

@@ -47,4 +47,31 @@ class Books
             ));
         }
     }
+
+    function obtenerLibrosId($id)
+    {
+        try {
+            $db = Flight::db();
+            $query = $db->prepare("SELECT * FROM tbl_libros WHERE id = :id");
+            $query->execute([":id" => $id]);
+            $data = $query->fetch();
+
+            $array = [
+                "Nombre" => $data['nombre_libro'],
+                "Autor" => $data['autor_libro'],
+                "Fecha de Publicacion" => $data['fecha_libro'],
+                "Categoria" => $data['categoria_libro']
+            ];
+
+            Flight::json($array);
+        } catch (PDOException $e) {
+            Flight::halt(500, json_encode(
+                [
+                    "error" => "Error en la consulta SQL: " . $e->getMessage(),
+                    "status" => "error",
+                    "code" => "500"
+                ]
+            ));
+        }
+    }
 }
