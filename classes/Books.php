@@ -50,11 +50,28 @@ class Books
 
     function obtenerLibrosId($id)
     {
+        // Validar que $id sea un número entero positivo
+        if (!is_numeric($id) || $id <= 0) {
+            Flight::halt(400, json_encode([
+                "error" => "ID no válido",
+                "status" => "error",
+                "code" => "400"
+            ]));
+        }
+
         try {
             $db = Flight::db();
             $query = $db->prepare("SELECT * FROM tbl_libros WHERE id = :id");
             $query->execute([":id" => $id]);
             $data = $query->fetch();
+
+            if ($data === false) {
+                Flight::halt(404, json_encode([
+                    "error" => "Libro no encontrado",
+                    "status" => "error",
+                    "code" => "404"
+                ]));
+            }
 
             $array = [
                 "Nombre" => $data['nombre_libro'],
