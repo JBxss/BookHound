@@ -298,4 +298,53 @@ class Books
             ));
         }
     }
+
+    function buscarLibros($searchString)
+    {
+        try {
+            $db = Flight::db();
+
+            // Modifica la consulta SQL para buscar el $searchString en los campos relevantes
+            $query = $db->prepare("SELECT * FROM tbl_libros WHERE nombre_libro LIKE :searchString OR autor_libro LIKE :searchString OR categoria_libro LIKE :searchString");
+
+            $searchParam = "%" . $searchString . "%"; // Agrega comodines para buscar el string en cualquier posición
+
+            $query->execute([":searchString" => $searchParam]);
+            $data = $query->fetchAll();
+
+            if ($query->rowCount() === 0) {
+                Flight::halt(404, json_encode(
+                    [
+                        "error" => "No se encontraron libros",
+                        "status" => "error",
+                        "code" => "404"
+                    ]
+                ));
+            } else {
+                $array = [];
+
+                foreach ($data as $row) {
+                    $array[] = [
+                        "Nombre" => $row['nombre_libro'],
+                        "Autor" => $row['autor_libro'],
+                        "Fecha de Publicacion" => $row['fecha_libro'],
+                        "Categoria" => $row['categoria_libro']
+                    ];
+                }
+
+                Flight::json([
+                    "total_rows" => $query->rowCount(),
+                    "rows" => $array
+                ]);
+            }
+        } catch (PDOException $e) {
+            Flight::halt(500, json_encode(
+                [
+                    "error" => "Error en la consulta SQL: " . $e->getMessage(),
+                    "status" => "error",
+                    "code" => "500"
+                ]
+            ));
+        }
+    }
 }

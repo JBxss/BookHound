@@ -14,6 +14,6 @@ Flight::route('PUT /books/@id', [$books, 'ActualizarLibro']);
 Flight::route('DELETE /books', [$books, 'EliminarLibro']);
 
 // // permite buscar libros en función de un criterio específico.
-// Flight::route('GET /books', [$books, '']);
+Flight::route('GET /buscar/@searchString', [$books, 'buscarLibros']);
 
 Flight::start();
